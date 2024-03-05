@@ -1,0 +1,80 @@
+---
+import { getCollection } from "astro:content";
+import ReactProducts from "../components/ReactProducts";
+import CustomForm from "../components/CustomForm.astro";
+
+const products = await getCollection("products", ({ data }) => data.in_stock);
+
+const res = await fetch(`${Astro.url}/api/posts.json`);
+const data = await res.json();
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Dynamic Endpoints</title>
+  </head>
+  <body class="p-6 grid gap-6">
+    <h1 class="text-3xl font-bold text-blue-500">Products</h1>
+    <!-- {
+      products.map(({ data }) => (
+        <ul class="p-4 rounded-md border-2 max-w-fit">
+          <li>
+            <strong>{data.product_name}</strong>
+          </li>
+          <li>{data.price}</li>
+          <li>In Stock: {data.in_stock}</li>
+        </ul>
+      ))
+    } -->
+    {
+      data.map((post) => (
+        <ul class="p-4 rounded-md border-2 max-w-fit">
+          <li>
+            <strong>{post.title}</strong>
+          </li>
+          <li>User ID: {post.userId}</li>
+          <button
+            data-id={post.id}
+            aria-label="Delete post"
+            class="grid place-items-center p-2"
+          >
+            <svg
+              class="size-4"
+              width="256"
+              height="256"
+              viewBox="0 0 256 256"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fill="currentColor"
+                d="M216 48h-36V36a28 28 0 0 0-28-28h-48a28 28 0 0 0-28 28v12H40a12 12 0 0 0 0 24h4v136a20 20 0 0 0 20 20h128a20 20 0 0 0 20-20V72h4a12 12 0 0 0 0-24M100 36a4 4 0 0 1 4-4h48a4 4 0 0 1 4 4v12h-56Zm88 168H68V72h120Zm-72-100v64a12 12 0 0 1-24 0v-64a12 12 0 0 1 24 0m48 0v64a12 12 0 0 1-24 0v-64a12 12 0 0 1 24 0"
+              />
+            </svg>
+          </button>
+        </ul>
+      ))
+    }
+    <!-- <ReactProducts client:only="react" /> -->
+    <!-- <CustomForm /> -->
+    <script>
+      const deleteBtns = document.querySelectorAll(
+        "[data-id]"
+      ) as NodeListOf<HTMLButtonElement>;
+
+      deleteBtns.forEach((btn) =>
+        btn.addEventListener("click", async () => {
+          const postId = btn.dataset.id;
+          const res = await fetch(`/api/posts/${postId}.json`, {
+            method: "DELETE",
+          });
+          const { message } = await res.json();
+          console.log("🚀 ~ deleteBtns.forEach ~ message:", message);
+        })
+      );
+    </script>
+  </body>
+</html>
